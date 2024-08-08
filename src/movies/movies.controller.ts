@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { Movie } from './movie.model';
@@ -15,30 +16,60 @@ export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
   @Get()
-  findAll(): Promise<Movie[]> {
-    return this.moviesService.findAll();
+  async findAll(): Promise<{ message: string; data: Movie[] }> {
+    const data = await this.moviesService.findAll();
+    return {
+      message: 'Movies fetched successfully',
+      data,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<Movie> {
-    return this.moviesService.findOne(id);
+  async findOne(
+    @Param('id') id: number,
+  ): Promise<{ message: string; data?: Movie }> {
+    const movie = await this.moviesService.findOne(id);
+    if (!movie) {
+      throw new NotFoundException(`Movie with id ${id} not found`);
+    }
+    return {
+      message: 'Movie fetched successfully',
+      data: movie,
+    };
   }
 
   @Post()
-  create(@Body() movie: Partial<Movie>): Promise<Movie> {
-    return this.moviesService.create(movie);
+  async create(
+    @Body() movie: Partial<Movie>,
+  ): Promise<{ message: string; data: Movie }> {
+    const createdMovie = await this.moviesService.create(movie);
+    return {
+      message: 'Movie created successfully',
+      data: createdMovie,
+    };
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateData: Partial<Movie>,
-  ): Promise<[number]> {
-    return this.moviesService.update(id, updateData);
+  ): Promise<{ message: string; data?: Movie }> {
+    const data = await this.moviesService.update(id, updateData);
+    return {
+      message: 'Movie updated successfully',
+      data,
+    };
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number): Promise<void> {
-    return this.moviesService.delete(id);
+  async delete(@Param('id') id: number): Promise<{ message: string }> {
+    const movie = await this.moviesService.findOne(id);
+    if (!movie) {
+      throw new NotFoundException(`Movie with id ${id} not found`);
+    }
+    await this.moviesService.delete(id);
+    return {
+      message: 'Movie deleted successfully',
+    };
   }
 }
