@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "rahul",
+    "password": "rahul",
+    "database": "movies",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "your-username",
+    "password": "your-password",
+    "database": "your-test-database-name",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "your-username",
+    "password": "your-password",
+    "database": "your-production-database-name",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

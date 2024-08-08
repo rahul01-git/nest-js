@@ -1,35 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { Movie, movies } from './fakeMoviesDB';
+import { InjectModel } from '@nestjs/sequelize';
+import { Movie } from './movie.model';
 
 @Injectable()
 export class MoviesService {
-  getAllMovies(): Movie[] {
-    return movies;
+  constructor(
+    @InjectModel(Movie)
+    private readonly movieModel: typeof Movie,
+  ) {}
+  async findAll(): Promise<Movie[]> {
+    return this.movieModel.findAll();
   }
 
-  getMovie(id: number): Movie | undefined {
-    return movies.find((movie) => movie.id === id);
+  async findOne(id: number): Promise<Movie | undefined> {
+    return this.movieModel.findByPk(id);
   }
 
-  create(movie: Partial<Movie>): Movie {
-    const newId = movies[movies.length - 1].id + 1;
-    const newMovie: Movie = {
-      id: newId,
-      title: movie.title ?? '',
-    };
-    movies.push(newMovie);
-    return newMovie;
+  async create(movie: Partial<Movie>): Promise<Movie> {
+    return await this.movieModel.create(movie);
   }
-
-  update(id: number, movie: Partial<Movie>): Movie | undefined {
-    const idx = movies.findIndex((mov) => mov.id === id);
-    movies[idx].title = movie.title;
-    return movies[idx];
+  async update(id: number, updateData: Partial<Movie>): Promise<[number]> {
+    return this.movieModel.update(updateData, { where: { id } });
   }
-
-  delete(id: number): Movie[] {
-    const idx = movies.findIndex((mov) => mov.id === id);
-    if (idx !== -1) movies.splice(idx, 1);
-    return movies;
+  async delete(id: number): Promise<void> {
+    const movie = await this.movieModel.findByPk(id);
+    await movie.destroy();
   }
 }

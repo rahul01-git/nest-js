@@ -1,45 +1,44 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
   Post,
+  Param,
+  Body,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
-import { Movie } from './fakeMoviesDB';
+import { Movie } from './movie.model';
 
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
   @Get()
-  getAllMovies(): Movie[] {
-    return this.moviesService.getAllMovies();
+  findAll(): Promise<Movie[]> {
+    return this.moviesService.findAll();
   }
 
-  @Get('/:id')
-  getMovie(@Param('id') id: string): Movie | undefined {
-    return this.moviesService.getMovie(+id);
+  @Get(':id')
+  findOne(@Param('id') id: number): Promise<Movie> {
+    return this.moviesService.findOne(id);
   }
 
   @Post()
-  addMovie(@Body() body: Partial<Movie>): Movie {
-    if (!body.title) throw new Error('movie title is required');
-    return this.moviesService.create(body);
+  create(@Body() movie: Partial<Movie>): Promise<Movie> {
+    return this.moviesService.create(movie);
   }
 
-  @Put('/:id')
-  updateMovie(
-    @Param('id') id: string,
-    @Body() body: Partial<Movie>,
-  ): Movie | undefined {
-    return this.moviesService.update(+id, body);
+  @Put(':id')
+  update(
+    @Param('id') id: number,
+    @Body() updateData: Partial<Movie>,
+  ): Promise<[number]> {
+    return this.moviesService.update(id, updateData);
   }
 
-  @Delete('/:id')
-  deleteMovie(@Param('id') id: string): Movie[] {
-    return this.moviesService.delete(+id);
+  @Delete(':id')
+  delete(@Param('id') id: number): Promise<void> {
+    return this.moviesService.delete(id);
   }
 }
